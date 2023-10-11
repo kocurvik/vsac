@@ -57,7 +57,7 @@ add_subdirectory(lib/pybind11)
 # Add source files
 file(GLOB_RECURSE SRCS_VSAC "src/*.cpp")
 file(GLOB_RECURSE POSE_LIB_SRC "lib/relative_pose/*.cpp")
-file(GLOB_RECURSE SRCS_SAMPLES "samples/*.cpp")
+#file(GLOB_RECURSE SRCS_SAMPLES "samples/*.cpp")
 
 # create libraries
 add_library(lvsac ${SRCS_VSAC})
@@ -66,8 +66,8 @@ target_link_libraries(lvsac ${OpenCV_LIBS} ${lapack_libs})
 add_library(pose_lib ${POSE_LIB_SRC})
 target_link_libraries(pose_lib ${OpenCV_LIBS} lvsac)
 
-add_library(samples ${SRCS_SAMPLES})
-target_link_libraries(samples ${OpenCV_LIBS} lvsac)
+#add_library(samples ${SRCS_SAMPLES})
+#target_link_libraries(samples ${OpenCV_LIBS} lvsac)
 
 ############# add python bindings ##############
 add_definitions(-fPIC)
@@ -77,7 +77,7 @@ target_link_libraries(pvsac PRIVATE pybind11::module lvsac pose_lib)
 ################################################
 
 add_executable(${PROJECT_NAME} ${POSE_LIB_SRC} main.cpp)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} pose_lib lvsac samples ${lapack_libs})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} pose_lib lvsac ${lapack_libs})
 
 #################### install #####################
 if (INSTALL)
