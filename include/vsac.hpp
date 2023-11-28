@@ -133,7 +133,8 @@ private:
         is_parallel = false, // use parallel RANSAC
         enforce_singular_vals = true, // enforce singular values for F and E estimation
         is_nonrand_test = false, // is test for the final model non-randomness
-        IS_QUASI_SAMPLING = false; // is quasi-pseudo-random sampling
+        IS_QUASI_SAMPLING = false, // is quasi-pseudo-random sampling
+        real_focal_check = false;
 
     // state of pseudo-random number generator
     int random_generator_state = 0;
@@ -220,6 +221,7 @@ public:
     void setRansacSolver (MethodSolver s) { null_solver = s; }
     void setFinalLSQiters (int iters) { final_lsq_iters = iters; }
     void setEnforceRank (bool enforce) { enforce_singular_vals = enforce; }
+    void setRealFocalCheck(bool real_focal_check_) { real_focal_check = real_focal_check_;}
 
     // getters
     bool isNonRandomnessTest () const { return is_nonrand_test; }
@@ -280,6 +282,7 @@ public:
     bool isPnP() const {
         return estimator == EstimationMethod ::P3P || estimator == EstimationMethod ::P6P;
     }
+    bool realFocalCheck() const { return real_focal_check; }
 };
 bool estimate (const Params &params, cv::InputArray points1, cv::InputArray points2,
                Output &output, cv::InputArray K1_, cv::InputArray K2_,

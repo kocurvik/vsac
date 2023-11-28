@@ -366,7 +366,7 @@ public:
     virtual bool verifyFundamental (const Mat &F_best, const Score &F_score, const std::vector<bool> &inliers_mask, cv::Mat &F_new, Score &new_score) = 0;
     static Ptr<FundamentalDegeneracy> create (int state, const Ptr<Quality> &quality_,
         const Mat &points_, int sample_size_, int max_iters_plane_and_parallax,
-        double homography_threshold, double f_inlier_thr_sqr, const Mat true_K1=Mat(), const Mat true_K2=Mat());
+        double homography_threshold, double f_inlier_thr_sqr, const bool real_focal_check, const Mat true_K1=Mat(), const Mat true_K2=Mat());
 };
 
 /////////////////////////////////////////////////////////////////////////////////////

@@ -292,15 +292,16 @@ private:
     Matx33d K, K2, K_inv, K2_inv, K2_inv_t, true_K2_inv, true_K2_inv_t, true_K1_inv, true_K1, true_K2_t;
     Score best_focal_score;
     bool true_K_given, is_principal_pt_set = false;
+    bool real_focal_check = false;
 public:
     FundamentalDegeneracyImpl (int state, const Ptr<Quality> &quality_, const Mat &points_,
                 int sample_size_, int plane_and_parallax_iters, double homography_threshold_,
-                double f_inlier_thr_sqr, const Mat true_K1_, const Mat true_K2_) :
+                double f_inlier_thr_sqr, const bool real_focal_check, const Mat true_K1_, const Mat true_K2_) :
             rng (state), quality(quality_), f_error(quality_->getErrorFnc()), points((float *) points_.data), points_mat(&points_),
             h_reproj_error(ReprojectionErrorForward::create(points_)),
             ep_deg (points_, sample_size_), homography_threshold (homography_threshold_),
             points_size (quality_->getPointsSize()), sample_size (sample_size_),
-            max_iters_plane_and_parallax(plane_and_parallax_iters) {
+            max_iters_plane_and_parallax(plane_and_parallax_iters), real_focal_check(real_focal_check) {
         if (sample_size_ == 8) {
             // add more homography samples to test for 8-points F
             h_sample.emplace_back(std::vector<int>{0, 1, 7}); h_sample_ver.emplace_back(std::vector<int>{2,3,4,5,6});
@@ -751,7 +752,50 @@ private:
         }
         return non_rand_support;
     }
-    inline bool isModelValid(const Mat &F, const std::vector<int> &sample) const override {
+
+    bool areBougnouxFocalsReal(const Mat& F) const {
+        /*if (std::rand() % 100 < 5)
+            return true;
+        else
+            return false;*/
+
+        const auto* const FF = (double*)F.data;
+
+        float f11 = FF[0], f12 = FF[1], f13 = FF[2];
+        float f21 = FF[3], f22 = FF[4], f23 = FF[5];
+        float f31 = FF[6], f32 = FF[7], f33 = FF[8];
+
+        float den, num;
+        float tol = 10e-8;
+
+        bool f1_pos, f2_pos;
+
+        den = f11 * f12 * f31 * f33 - f11 * f13 * f31 * f32 + f12 * f12 * f32 * f33 - f12 * f13 * f32 * f32 +
+            f21 * f22 * f31 * f33 - f21 * f23 * f31 * f32 + f22 * f22 * f32 * f33 - f22 * f23 * f32 * f32;
+        num = -f33 * (f12 * f13 * f33 - f13 * f13 * f32 + f22 * f23 * f33 - f23 * f23 * f32);
+       
+        if (num * den < 0)
+            return false;
+
+        f11 = FF[0], f12 = FF[3], f13 = FF[6];
+        f21 = FF[1], f22 = FF[4], f23 = FF[7];
+        f31 = FF[2], f32 = FF[5], f33 = FF[8];
+
+        den = f11 * f12 * f31 * f33 - f11 * f13 * f31 * f32 + f12 * f12 * f32 * f33 - f12 * f13 * f32 * f32 +
+            f21 * f22 * f31 * f33 - f21 * f23 * f31 * f32 + f22 * f22 * f32 * f33 - f22 * f23 * f32 * f32;
+
+        num = -f33 * (f12 * f13 * f33 - f13 * f13 * f32 + f22 * f23 * f33 - f23 * f23 * f32);
+
+        if (num * den < 0)
+            return false;
+        return true;
+    }
+
+    inline bool isModelValid(const Mat& F, const std::vector<int>& sample) const override {
+        if (real_focal_check) {
+            if (!areBougnouxFocalsReal(F))
+                return false;
+        }
         return ep_deg.isModelValid(F, sample);
     }
     bool areSameSingularValues (const Matx33d &F) {
@@ -766,9 +810,9 @@ private:
 };
 Ptr<FundamentalDegeneracy> FundamentalDegeneracy::create (int state, const Ptr<Quality> &quality_,
         const Mat &points_, int sample_size_, int max_iters_plane_and_parallax, double homography_threshold_,
-        double f_inlier_thr_sqr, const Mat true_K1, const Mat true_K2) {
+        double f_inlier_thr_sqr, const bool real_focal_check, const Mat true_K1, const Mat true_K2) {
     return makePtr<FundamentalDegeneracyImpl>(state, quality_, points_, sample_size_,
-              max_iters_plane_and_parallax, homography_threshold_, f_inlier_thr_sqr, true_K1, true_K2);
+              max_iters_plane_and_parallax, homography_threshold_, f_inlier_thr_sqr, real_focal_check, true_K1, true_K2);
 }
 
 class EssentialDegeneracyImpl : public EssentialDegeneracy {

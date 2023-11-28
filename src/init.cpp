@@ -63,7 +63,7 @@ void VSAC::initialize (int state, Ptr<MinimalSolver> &min_solver, Ptr<NonMinimal
     } else if (params.isFundamental()) {
         if (K1.empty() || K2.empty()) {
             degeneracy = FundamentalDegeneracy::create(state++, quality, points, min_sample_size,
-               params.getPlaneAndParallaxIters(), std::max(threshold, 8.) /*sqr homogr thr*/, inner_inlier_thr_sqr, K1, K2);
+               params.getPlaneAndParallaxIters(), std::max(threshold, 8.) /*sqr homogr thr*/, inner_inlier_thr_sqr, params.realFocalCheck(), K1, K2);
             degeneracy.dynamicCast<FundamentalDegeneracy>()->setPrincipalPoint(params.getImage1Size().width/2., params.getImage1Size().height/2., params.getImage2Size().width/2., params.getImage2Size().height/2.);
         } else degeneracy = FundamentalDegeneracyViaE::create(quality, points, calib_points, K1, K2, true/*is F*/);
         if (min_sample_size == 7) {

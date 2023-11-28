@@ -140,7 +140,8 @@ PYBIND11_MODULE(pvsac, m) {
             .def("setEnforceRank", &vsac::Params::setEnforceRank)
             .def("setImagesSize_", &vsac::Params::setImagesSize_)
             .def("setRandomGeneratorState", &vsac::Params::setRandomGeneratorState)
-            .def("setNonRandomnessTest", &vsac::Params::setNonRandomnessTest);
+            .def("setNonRandomnessTest", &vsac::Params::setNonRandomnessTest)
+            .def("setRealFocalCheck", &vsac::Params::setRealFocalCheck);
 
     m.def("getCorrectedPointsHomography", &getCorrectedPointsHomography, "get corrected points by H", pybind11::arg("points1"), pybind11::arg("points2"),
             pybind11::arg("H"), pybind11::arg("good_point_mask"));
